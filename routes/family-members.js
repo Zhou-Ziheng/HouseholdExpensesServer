@@ -111,7 +111,8 @@ router.post('/', async(req, res) => {
             allowance: req.body.allowance,
             categories: categories,
             used: used,
-            familyId: req.body.familyId
+            familyId: req.body.familyId,
+            password: req.body.password
         });
 
         try {
@@ -128,7 +129,8 @@ router.post('/', async(req, res) => {
             name: req.body.name,
             username: req.body.username,
             allowance: req.body.allowance,
-            familyId: req.body.familyId
+            familyId: req.body.familyId,
+            password: req.body.password
         });
         try {
             familyMember = await familyMember.save();
@@ -163,7 +165,8 @@ router.put('/:id', async (req, res) => {
                 username: req.body.username,
                 allowance: req.body.allowance,
                 categories: categories,
-                used: used
+                used: used,
+                password: req.body.password
             }, {
                 new: true
             });
@@ -178,6 +181,7 @@ router.put('/:id', async (req, res) => {
                 name: req.body.name,
                 username: req.body.username,
                 allowance: req.body.allowance,
+                password: req.body.password
             }, {
                 new: true
             });

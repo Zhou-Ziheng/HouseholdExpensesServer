@@ -15,7 +15,8 @@ export const familyMemberSchema = new mongoose.Schema({
     allowance: Number,
     used: Number,
     categories: [categorySchema],
-    familyId: String
+    familyId: String,
+    password: String
 });
 
 export const FamilyMember = mongoose.model('FamilyMember', familyMemberSchema);
@@ -26,7 +27,8 @@ function validateFamilyMemeber(familyMember) {
         username: Joi.string().required(),
         allowance: Joi.number(),
         familyId: Joi.number(),
-        categoryIds: Joi.array().items(Joi.string())
+        categoryIds: Joi.array().items(Joi.string()),
+        password: Joi.string()
     });
 
     const result = schema.validate(familyMember);
