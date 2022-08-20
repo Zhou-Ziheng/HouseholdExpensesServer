@@ -1,10 +1,12 @@
 import express from "express";
 import { FamilyMember } from "../models/family-member.js";
+// import { Expense } from '../models/expense.js';
+import { Category } from "../models/category.js";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const familyMembers = await FamilyMember.find().sort("firstName");
+  const familyMembers = await FamilyMember.find().sort("name");
   res.send(familyMembers);
 });
 
@@ -20,33 +22,66 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  console.log("body", JSON.stringify(req.body));
+  // can use this for recurring expenses
+  // or should you just add an expense without needing it to be previously created
+  let categories = [];
+  let used = 0;
+
+  for (let i = 0; i < req.body.categoryIds.length; i++) {
+    const categoryId = req.body.categoryIds[i];
+    const category = await Category.findById(categoryId);
+    if (!category) return res.status(400).send("Invalid category ID");
+    categories.push(category);
+    used += category.totalAmount;
+
+    // for (let i = 0; i < (expense.categories).length; i++) {
+    //     used += expense.categories[i].totalAmount
+    // }
+  }
+  // const expense = await Expense.findById(req.body.expenseId);
+  // if (!expense) return res.status(400).send('Invalid expense ID');
+
+  // not sure if this is right
   let familyMember = new FamilyMember({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
+    name: req.body.name,
+    username: req.body.username,
+    allowance: req.body.allowance,
+    categories: categories,
+    // used: used
   });
 
   try {
-    console.log(familyMember);
     familyMember = await familyMember.save();
   } catch (ex) {
     console.log(ex);
-    if (typeof ex.errors === "array") {
-      for (field in ex.errors) {
-        console.log(ex.errors[field].message);
-      }
+    for (field in ex.errors) {
+      console.log(ex.errors[field].message);
     }
   }
+
   res.send(familyMember);
 });
 
 router.put("/:id", async (req, res) => {
   try {
+    let categories = [];
+    let used = 0;
+
+    for (let i = 0; i < req.body.categoryIds.length; i++) {
+      const categoryId = req.body.categoryIds[i];
+      const category = await Category.findById(categoryId);
+      if (!category) return res.status(400).send("Invalid category ID");
+      categories.push(category);
+      used += category.totalAmount;
+    }
     const familyMember = await FamilyMember.findByIdAndUpdate(
       req.params.id,
       {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
+        name: req.body.name,
+        username: req.body.username,
+        allowance: req.body.allowance,
+        categories: categories,
+        used: used,
       },
       {
         new: true,
