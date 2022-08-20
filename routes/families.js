@@ -30,6 +30,9 @@ router.post('/', async(req, res) => {
         famMembs.push(famMemb);
         totalUsed += famMemb.used;
         totalAllowance += famMemb.allowance;
+        console.log("total allowance: " + totalAllowance);
+        console.log("total use: " + totalUsed);
+        console.log(famMemb);
 
         // for (let i = 0; i < (expense.categories).length; i++) {
         //     used += expense.categories[i].totalAmount
@@ -38,8 +41,8 @@ router.post('/', async(req, res) => {
    
     let family = new Family({
        familyName: req.body.familyName,
-       totalAllowance: 0,
-       totalUsed: 0,
+       totalAllowance: totalAllowance,
+       totalUsed: totalUsed,
        familyMembers: famMembs
     });
     try {
