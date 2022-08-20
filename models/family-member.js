@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { expensesSchema } from './expense';
+import { expensesSchema } from './expense.js';
 
 export const familyMemberSchema = new mongoose.Schema({
     name: {
