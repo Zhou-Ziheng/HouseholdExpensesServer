@@ -38,7 +38,7 @@ router.post('/', async(req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
-        const item = new Item({
+        const item = await Item.findByIdAndUpdate(req.params.id, {
             title: req.body.title,
             description: req.body.description,
             cost: req.body.cost,
