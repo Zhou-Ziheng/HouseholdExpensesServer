@@ -29,9 +29,14 @@ router.post('/', async(req, res) => {
     try {
         item = await item.save();
     } catch(ex) {
-        for (field in ex.errors) {
-            console.log(ex.errors[field].message);
+        console.log(ex);
+        for (let i = 0; i < (ex.errors).length; i++) {
+            console.log(ex.errors[i].message);
         }
+        res.status(400).send(ex);
+        // for (field in ex.errors) {
+        //     console.log(ex.errors[field].message);
+        // }
     }
     res.send(item);
 });

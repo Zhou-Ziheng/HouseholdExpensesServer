@@ -22,11 +22,18 @@ router.post('/', async(req, res) => {
     // can use this for recurring expenses
     // or should you just add an expense without needing it to be previously created
     let expenses = [];
+    let used = 0;
 
-    for (let i = 0; i < req.body.expenseIds.length; i++ ){
-        const expense = await Expense.findById(req.body.expenseId);
+    for (let i = 0; i < (req.body.expenseIds).length; i++ ){
+        const expenseId = expenseIds[i];
+        const expense = await Expense.findById(expenseId);
         if (!expense) return res.status(400).send('Invalid expense ID');
         expenses.push(expense);
+        // used += expense.
+
+        for (let i = 0; i < (expense.categories).length; i++) {
+            used += expense.categories[i].totalAmount
+        }
     }
     // const expense = await Expense.findById(req.body.expenseId);
     // if (!expense) return res.status(400).send('Invalid expense ID');

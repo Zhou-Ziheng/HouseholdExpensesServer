@@ -11,6 +11,7 @@ export const familyMemberSchema = new mongoose.Schema({
         required: true
     },
     allowance: Number,
+    used: Number,
     expenses: [expensesSchema]
 })
 

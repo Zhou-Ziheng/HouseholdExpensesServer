@@ -1,5 +1,6 @@
 import express from 'express';
 import { Expense } from '../models/expense.js';
+import { Category } from '../models/category.js';
 
 const router = express.Router();
 
@@ -19,9 +20,17 @@ router.get('/:id', async(req, res) => {
 });
 
 router.post('/', async(req, res) => {
+    let categories = [];
+
+    for (let i = 0; i < (req.body.categoryIds).length; i++) {
+        const categoryId = req.body.categoryIds[i];
+        const category = await Category.findById(categoryId);
+        if (!category) return res.status(400).send('Invalid category ID');
+        categories.push(category);
+    }
    
     let expense = new Expense({
-        categories: req.body.categories
+        categories: categories
     });
     try {
         expense = await expense.save();
@@ -35,8 +44,17 @@ router.post('/', async(req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
+        let categories = [];
+
+        for (let i = 0; i < (req.body.categoryIds).length; i++) {
+        const categoryId = req.body.categoryIds[i];
+        const category = await Category.findById(categoryId);
+        if (!category) return res.status(400).send('Invalid category ID');
+        categories.push(category);
+     }
+
         const expense = await Expense.findByIdAndUpdate(req.params.id, {
-            categories: req.body.categories
+            categories: categories
         }, {
             new: true
         });
