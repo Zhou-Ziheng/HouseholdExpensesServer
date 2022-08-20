@@ -1,10 +1,10 @@
 import express from 'express';
-import { Item } from '../models/item.js';
+import { Item, validate } from '../models/item.js';
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const item = await Item.find().sort('name');
+    const item = await Item.find().sort('title');
     res.send(item);
 });
 
@@ -19,6 +19,8 @@ router.get('/:id', async(req, res) => {
 });
 
 router.post('/', async(req, res) => {
+    const { error } = validate(req.body); 
+    if (error) return res.status(400).send(error.details[0].message);
    
     let item = new Item({
         title: req.body.title,
@@ -29,19 +31,19 @@ router.post('/', async(req, res) => {
     try {
         item = await item.save();
     } catch(ex) {
-        console.log(ex);
         for (let i = 0; i < (ex.errors).length; i++) {
             console.log(ex.errors[i].message);
         }
         res.status(400).send(ex);
-        // for (field in ex.errors) {
-        //     console.log(ex.errors[field].message);
-        // }
     }
     res.send(item);
 });
 
 router.put('/:id', async (req, res) => {
+
+    const { error } = validate(req.body); 
+    if (error) return res.status(400).send(error.details[0].message);
+    
     try {
         const item = await Item.findByIdAndUpdate(req.params.id, {
             title: req.body.title,
