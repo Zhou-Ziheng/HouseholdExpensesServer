@@ -5,7 +5,7 @@ import { Item } from '../models/item.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const category = await Category.find().sort('name');
+    const category = await Category.find().sort('category');
     res.send(category);
 });
 
@@ -40,7 +40,7 @@ router.post('/', async(req, res) => {
     // }
    
     let category = new Category({
-        name: req.body.name,
+        category: req.body.category,
         items: items,
         totalAmount: totalAmount
     });
@@ -67,7 +67,7 @@ router.put('/:id', async (req, res) => {
             totalAmount += item.cost;
         }
         const category = await Category.findByIdAndUpdate(req.params.id, {
-            name: req.body.name,
+            category: req.body.category,
             totalAmount: totalAmount,
             items: items
         }, {

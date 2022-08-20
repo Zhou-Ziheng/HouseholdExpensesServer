@@ -1,6 +1,7 @@
 import express from 'express';
 import { FamilyMember } from '../models/family-member.js';
-import { Expense } from '../models/expense.js';
+// import { Expense } from '../models/expense.js';
+import { Category } from '../models/category.js';
 
 const router = express.Router();
 
@@ -21,19 +22,19 @@ router.get('/:id', async(req, res) => {
 router.post('/', async(req, res) => {
     // can use this for recurring expenses
     // or should you just add an expense without needing it to be previously created
-    let expenses = [];
+    let categories = [];
     let used = 0;
 
-    for (let i = 0; i < (req.body.expenseIds).length; i++ ){
-        const expenseId = expenseIds[i];
-        const expense = await Expense.findById(expenseId);
-        if (!expense) return res.status(400).send('Invalid expense ID');
-        expenses.push(expense);
-        // used += expense.
+    for (let i = 0; i < (req.body.categoryIds).length; i++ ){
+        const categoryId = req.body.categoryIds[i];
+        const category = await Category.findById(categoryId);
+        if (!category) return res.status(400).send('Invalid category ID');
+        categories.push(category);
+        used += category.totalAmount;
 
-        for (let i = 0; i < (expense.categories).length; i++) {
-            used += expense.categories[i].totalAmount
-        }
+        // for (let i = 0; i < (expense.categories).length; i++) {
+        //     used += expense.categories[i].totalAmount
+        // }
     }
     // const expense = await Expense.findById(req.body.expenseId);
     // if (!expense) return res.status(400).send('Invalid expense ID');
@@ -44,12 +45,14 @@ router.post('/', async(req, res) => {
         name: req.body.name,
         username: req.body.username,
         allowance: req.body.allowance,
-        expenses: expenses
+        categories: categories,
+        // used: used
     });
 
     try {
         familyMember = await familyMember.save();
     } catch(ex) {
+        console.log(ex);
         for (field in ex.errors) {
             console.log(ex.errors[field].message);
         }
@@ -59,9 +62,24 @@ router.post('/', async(req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
+        let categories = [];
+        let used = 0;
+
+        for (let i = 0; i < (req.body.categoryIds).length; i++ ){
+            const categoryId = req.body.categoryIds[i];
+            const category = await Category.findById(categoryId);
+            if (!category) return res.status(400).send('Invalid category ID');
+            categories.push(category);
+            used += category.totalAmount;
+
+        
+        }
         const familyMember = await FamilyMember.findByIdAndUpdate(req.params.id, {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
+            name: req.body.name,
+            username: req.body.username,
+            allowance: req.body.allowance,
+            categories: categories,
+            used: used
         }, {
             new: true
         });

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import { expensesSchema } from './expense.js';
+// import { expensesSchema } from './expense.js';
+import { categorySchema } from './category.js';
 
 export const familyMemberSchema = new mongoose.Schema({
     name: {
@@ -12,7 +13,7 @@ export const familyMemberSchema = new mongoose.Schema({
     },
     allowance: Number,
     used: Number,
-    expenses: [expensesSchema]
+    categories: [categorySchema]
 })
 
-export const FamilyMember = mongoose.model('FamilyMember', expensesSchema);
+export const FamilyMember = mongoose.model('FamilyMember', familyMemberSchema);
