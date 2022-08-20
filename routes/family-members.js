@@ -23,6 +23,71 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.post("/signin", async (req, res) => {
+    const familyMember = await FamilyMember.findOne({
+      username: req.body.username,
+    });
+  
+    try {
+      console.log(req.body.password);
+      console.log(familyMember.password);
+      const verified = await verify(familyMember.password, req.body.password);
+      if (verified) {
+        res.cookie("userid", familyMember._id);
+        res.send(familyMember);
+        return;
+      }
+    } catch (ex) {
+      console.log(ex);
+    }
+  
+    res.send({ error: "invalid password/username" });
+});
+  
+router.post("/signup", async (req, res) => {
+    console.log(req.body.family);
+    const family = Family.findOne({ _id: req.body.family });
+  
+    let familyMember;
+    if (family) {
+      // not sure if this is right
+      familyMember = new FamilyMember({
+        name: req.body.name,
+        username: req.body.username,
+        allowance: 1,
+        categories: [],
+        used: 0,
+        family: req.body.family,
+        password: await hash(req.body.password),
+      });
+    } else {
+      familyMember = new FamilyMember({
+        name: req.body.name,
+        username: req.body.username,
+        allowance: 1,
+        categories: [],
+        used: 0,
+        family: "",
+        password: await hash(req.body.password),
+      });
+    }
+  
+    try {
+      familyMember = await familyMember.save();
+      Family.findOneAndUpdate({ _id: req.body.family });
+      family.save();
+    } catch (ex) {
+      console.log(ex);
+      for (field in ex.errors) {
+        console.log(ex.errors[field].message);
+        }
+    }
+
+    res.cookie("userid", familyMember._id);
+    res.send(familyMember);
+
+}); 
+
 router.post('/', async(req, res) => {
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);

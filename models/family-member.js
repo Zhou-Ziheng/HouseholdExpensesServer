@@ -16,7 +16,7 @@ export const familyMemberSchema = new mongoose.Schema({
     used: Number,
     categories: [categorySchema],
     familyId: String
-})
+});
 
 export const FamilyMember = mongoose.model('FamilyMember', familyMemberSchema);
 
