@@ -122,30 +122,7 @@ router.put('/:id', async (req, res) => {
             return res.status(404).send('The family member with the given ID was not found');
         }
     }
-  }
-  // const expense = await Expense.findById(req.body.expenseId);
-  // if (!expense) return res.status(400).send('Invalid expense ID');
-
-  // not sure if this is right
-  let familyMember = new FamilyMember({
-    name: req.body.name,
-    username: req.body.username,
-    allowance: req.body.allowance,
-    categories: categories,
-    // used: used
   });
-
-  try {
-    familyMember = await familyMember.save();
-  } catch (ex) {
-    console.log(ex);
-    for (field in ex.errors) {
-      console.log(ex.errors[field].message);
-    }
-  }
-
-  res.send(familyMember);
-});
 
 router.put("/:id", async (req, res) => {
   try {
