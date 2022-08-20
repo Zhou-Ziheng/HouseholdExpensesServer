@@ -5,7 +5,7 @@ import { Expense } from '../models/expense.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const familyMembers = await FamilyMember.find().sort('firstName');
+    const familyMembers = await FamilyMember.find().sort('name');
     res.send(familyMembers);
 });
 
