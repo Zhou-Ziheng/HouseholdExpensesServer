@@ -4,19 +4,42 @@ import { Family, validate } from '../models/family.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-    const families = await Family.find().sort('name');
-    res.send(families);
+router.get("/", async (req, res) => {
+  const families = await Family.find().sort("name");
+  res.send(families);
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const family = await Family.findById(req.params.id);
+    res.send(family);
+  } catch (ex) {
+    return res.status(404).send("The family with the given ID was not found");
+  }
+});
 
-router.get('/:id', async(req, res) => {
-    try{
-        const family = await Family.findById(req.params.id);
-        res.send(family);
-    } catch(ex) {
-        return res.status(404).send('The family with the given ID was not found');
-    }
+router.post("/new", async (req, res) => {
+  const user = await FamilyMember.findOne({ _id: req.cookies.userid });
+
+  let family = new Family({
+    familyName: req.body.familyName,
+    totalAllowance: 0,
+    totalUsed: 0,
+    admins: [user],
+    familyMembers: [user],
+  });
+
+  try {
+    user.family = family._id;
+    await user.save();
+    family = await family.save();
+  } catch (ex) {
+    console.log(ex);
+    // for (field in ex.errors) {
+    //     console.log(ex.errors[field].message);
+    // }
+  }
+  res.send(family);
 });
 
 router.post('/', async(req, res) => {
@@ -111,17 +134,15 @@ router.put('/:id', async (req, res) => {
             return res.status(404).send('The family with the given ID was not found');
         }
     }
-    
 });
 
-router.delete('/:id', async (req, res)  => {
-    try {
-        const family  = await Family.findByIdAndRemove(req.params.id)
-        res.send(family);
-    }
-    catch(ex){
-        return res.status(404).send('The family with the given ID was not found');
-    }
+router.delete("/:id", async (req, res) => {
+  try {
+    const family = await Family.findByIdAndRemove(req.params.id);
+    res.send(family);
+  } catch (ex) {
+    return res.status(404).send("The family with the given ID was not found");
+  }
 });
 
-export {router as families};
+export { router as families };

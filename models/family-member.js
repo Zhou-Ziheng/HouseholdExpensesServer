@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { categorySchema } from './category.js';
 import Joi from 'joi';
 
+//add password
 export const familyMemberSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -33,3 +34,4 @@ function validateFamilyMemeber(familyMember) {
 }
 
 export {validateFamilyMemeber as validate};
+
