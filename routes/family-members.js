@@ -1,5 +1,5 @@
 import express from 'express';
-import { FamilyMember } from '../models/family-member.js';
+import { FamilyMember, validate } from '../models/family-member.js';
 // import { Expense } from '../models/expense.js';
 import { Category } from '../models/category.js';
 
@@ -20,44 +20,58 @@ router.get('/:id', async(req, res) => {
 });
 
 router.post('/', async(req, res) => {
-    // can use this for recurring expenses
-    // or should you just add an expense without needing it to be previously created
-    let categories = [];
-    let used = 0;
-
-    for (let i = 0; i < (req.body.categoryIds).length; i++ ){
-        const categoryId = req.body.categoryIds[i];
-        const category = await Category.findById(categoryId);
-        if (!category) return res.status(400).send('Invalid category ID');
-        categories.push(category);
-        used += category.totalAmount;
-
-        // for (let i = 0; i < (expense.categories).length; i++) {
-        //     used += expense.categories[i].totalAmount
-        // }
-    }
-    // const expense = await Expense.findById(req.body.expenseId);
-    // if (!expense) return res.status(400).send('Invalid expense ID');
+    const { error } = validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
 
-    // not sure if this is right
-    let familyMember = new FamilyMember({
-        name: req.body.name,
-        username: req.body.username,
-        allowance: req.body.allowance,
-        categories: categories,
-        used: used
-    });
+    if (req.body.categoryIds) {
+        let categories = [];
+        let used = 0;
 
-    try {
-        familyMember = await familyMember.save();
-    } catch(ex) {
-        console.log(ex);
-        for (field in ex.errors) {
-            console.log(ex.errors[field].message);
+        for (let i = 0; i < (req.body.categoryIds).length; i++ ){
+            const categoryId = req.body.categoryIds[i];
+            const category = await Category.findById(categoryId);
+            if (!category) return res.status(400).send('Invalid category ID');
+            categories.push(category);
+            used += category.totalAmount;
         }
+
+        let familyMember = new FamilyMember({
+            name: req.body.name,
+            username: req.body.username,
+            allowance: req.body.allowance,
+            categories: categories,
+            used: used,
+            familyId: req.body.familyId
+        });
+
+        try {
+            familyMember = await familyMember.save();
+        } catch(ex) {
+            console.log(ex);
+            for (field in ex.errors) {
+                console.log(ex.errors[field].message);
+            }
+        }
+        res.send(familyMember);
+    } else { 
+        let familyMember = new FamilyMember({
+            name: req.body.name,
+            username: req.body.username,
+            allowance: req.body.allowance,
+            familyId: req.body.familyId
+        });
+        try {
+            familyMember = await familyMember.save();
+        }  catch(ex) {
+            for (let i = 0; i < (ex.errors).length; i++) {
+                console.log(ex.errors[i].message);
+            }
+            res.status(400).send(ex);
+        }
+        res.send(familyMember);
     }
-    res.send(familyMember);
+    
 });
 
 // make it so new categories don't just replace old ones

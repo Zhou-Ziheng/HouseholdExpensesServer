@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-// import { expensesSchema } from './expense.js';
 import { categorySchema } from './category.js';
+import Joi from 'joi';
 
 export const familyMemberSchema = new mongoose.Schema({
     name: {
@@ -13,7 +13,23 @@ export const familyMemberSchema = new mongoose.Schema({
     },
     allowance: Number,
     used: Number,
-    categories: [categorySchema]
+    categories: [categorySchema],
+    familyId: String
 })
 
 export const FamilyMember = mongoose.model('FamilyMember', familyMemberSchema);
+
+function validateFamilyMemeber(familyMember) {
+    const schema = Joi.object({
+        name: Joi.string().required(),
+        username: Joi.string().required(),
+        allowance: Joi.number(),
+        familyId: Joi.number(),
+        categoryIds: Joi.array().items(Joi.string())
+    });
+
+    const result = schema.validate(familyMember);
+    return result;
+}
+
+export {validateFamilyMemeber as validate};
