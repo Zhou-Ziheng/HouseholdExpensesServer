@@ -13,4 +13,4 @@ export const itemSchema = new mongoose.Schema({
     date: Date
 });
 
-export const Item = mongoose.model('CateItemgory', itemSchema);
+export const Item = mongoose.model('Item', itemSchema);
