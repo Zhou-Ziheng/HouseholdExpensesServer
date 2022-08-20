@@ -5,6 +5,7 @@ import { familyMembers } from "./routes/family-members.js";
 import { items } from "./routes/items.js";
 import { categories } from "./routes/categories.js";
 import { families } from "./routes/families.js";
+import cookieParser from "cookie-parser";
 // import { expenses } from './routes/expenses.js';
 const app = express();
 
@@ -15,11 +16,12 @@ mongoose
 
 app.use(
   cors({
-    credentials: true,
     origin: ["http://localhost:3001", "https://web.postman.co/"],
+    credentials: true,
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 app.use("/api/family-members", familyMembers);
 app.use("/api/items", items);
 app.use("/api/categories", categories);

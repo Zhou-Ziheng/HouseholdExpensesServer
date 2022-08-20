@@ -3,6 +3,7 @@ import { FamilyMember } from "../models/family-member.js";
 // import { Expense } from '../models/expense.js';
 import { Category } from "../models/category.js";
 import { hash, verify } from "argon2";
+import { Family } from "../models/family.js";
 
 const router = express.Router();
 
@@ -45,19 +46,36 @@ router.post("/signin", async (req, res) => {
 
 router.post("/signup", async (req, res) => {
   console.log(req.body.family);
-  // not sure if this is right
-  let familyMember = new FamilyMember({
-    name: req.body.name,
-    username: req.body.username,
-    allowance: 1,
-    categories: [],
-    used: 0,
-    family: req.body.family,
-    password: await hash(req.body.password),
-  });
+  const family = Family.findOne({ _id: req.body.family });
+
+  let familyMember;
+  if (family) {
+    // not sure if this is right
+    familyMember = new FamilyMember({
+      name: req.body.name,
+      username: req.body.username,
+      allowance: 1,
+      categories: [],
+      used: 0,
+      family: req.body.family,
+      password: await hash(req.body.password),
+    });
+  } else {
+    familyMember = new FamilyMember({
+      name: req.body.name,
+      username: req.body.username,
+      allowance: 1,
+      categories: [],
+      used: 0,
+      family: "",
+      password: await hash(req.body.password),
+    });
+  }
 
   try {
     familyMember = await familyMember.save();
+    Family.findOneAndUpdate({ _id: req.body.family });
+    family.save();
   } catch (ex) {
     console.log(ex);
     for (field in ex.errors) {

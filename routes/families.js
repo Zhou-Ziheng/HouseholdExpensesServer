@@ -19,8 +19,7 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/new", async (req, res) => {
-  console.log(req);
-  const user = await FamilyMember.findOne({ _id: req.cookies });
+  const user = await FamilyMember.findOne({ _id: req.cookies.userid });
 
   let family = new Family({
     familyName: req.body.familyName,
