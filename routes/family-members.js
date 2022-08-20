@@ -19,8 +19,8 @@ router.get('/:id', async(req, res) => {
 
 router.post('/', async(req, res) => {
     let familyMember = new FamilyMember({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName
+        name: req.body.name,
+        username: req.body.username
     });
 
     try {
