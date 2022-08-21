@@ -93,6 +93,7 @@ router.post('/', async(req, res) => {
 
 // need to update here
 router.put('/:id', async (req, res) => {
+    console.log('in put');
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -106,8 +107,8 @@ router.put('/:id', async (req, res) => {
             const famMemb = await FamilyMember.findById(famMembId);
             if (!famMemb) return res.status(400).send('Invalid family member ID');
             famMembs.push(famMemb);
-            totalUsed += famMemb.used;
-            totalAllowance += famMemb.allowance;
+            if (famMemb.used) totalUsed += famMemb.used;
+            if (famMemb.allowance) totalAllowance += famMemb.allowance;
         }
         try {
             const family = Family.findByIdAndUpdate(req.params.id, {
@@ -118,8 +119,11 @@ router.put('/:id', async (req, res) => {
              }, {
                 new: true
             });
+            console.log('before send');
             res.send(family);
+            console.log('after send');
         } catch(ex) {
+            console.log(ex);
             return res.status(404).send('The family with the given ID was not found');
         }
     } else {

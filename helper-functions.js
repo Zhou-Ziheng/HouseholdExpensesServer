@@ -9,18 +9,23 @@ async function addOneFamMember(memId, famId) {
         allMembers.push(family.familyMembers[i]._id)
     }
     console.log(family.familyName);
+    console.log(allMembers);
 
-    const putResponse = await fetch('http://localhost:3000/api/families/' + famId, {
-      method: 'PUT',
-      body: {
-        "familyName": family.familyName,
-        "familyMemberIds": allMembers
-      }, // string or object
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    // console.log(putResponse);
+    // const putResponse = await fetch('http://localhost:3000/api/families/' + famId, {
+    //   method: 'PUT',
+    //   body: JSON.stringify({
+    //     familyName: family.familyName,
+    //     familyMemberIds: allMembers,
+    //   }), // string or object
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // });
+    // console.log(putResponse );
+    // console.log('\n');
+    // const newFamily = await putResponse.json();
+    // console.log(newFamily);
+
 }
 
 export { addOneFamMember };
