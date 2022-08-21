@@ -20,8 +20,15 @@ router.get("/:id", async (req, res) => {
     const family = await Family.findById(req.params.id);
     const populatedFam = await (
       await family.populate("admins")
-    ).populate({ path: "familyMembers", populate: { path: "categories" } });
-
+    ).populate({
+      path: "familyMembers",
+      populate: {
+        path: "categories",
+        populate: {
+          path: "items",
+        },
+      },
+    });
     res.send(populatedFam);
   } catch (ex) {
     return res.status(404).send("The family with the given ID was not found");
