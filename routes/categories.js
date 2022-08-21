@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import { Category, validate } from "../models/category.js";
 import { Item } from "../models/item.js";
 
@@ -6,22 +7,15 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   const category = await Category.find().sort("category");
+  for (let i = 0; i < category.length; i++) {
+    category[i] = await category[i].populate("items");
+  }
   res.send(category);
 });
 
 router.get("/:id", async (req, res) => {
   try {
-    const category = await Category.findById(req.params.id);
-    const items = category.items;
-
-    const embedItems = [];
-    for (let i = 0; i < items.length; i++) {
-      const response = await fetch(
-        "https://localhost:3000/api/items/" + items[i]
-      );
-      embedItems.push(await response.json());
-    }
-    category.items = embedItems;
+    const category = await Category.findById(req.params.id).populate("items");
     res.send(category);
   } catch (ex) {
     return res.status(404).send("The category with the given ID was not found");
@@ -37,9 +31,9 @@ router.post("/", async (req, res) => {
   if (req.body.itemIds) {
     for (let i = 0; i < req.body.itemIds.length; i++) {
       const itemId = req.body.itemIds[i];
+      items.push(mongoose.Types.ObjectId(itemId));
       const item = await Item.findById(itemId);
       if (!item) return res.status(400).send("Invalid item ID");
-      items.push(item);
       totalAmount += item.cost;
     }
 
@@ -60,6 +54,8 @@ router.post("/", async (req, res) => {
   } else {
     let category = new Category({
       category: req.body.category,
+      items: [],
+      totalAmount: 0,
     });
     try {
       category = await category.save();
@@ -82,9 +78,9 @@ router.put("/:id", async (req, res) => {
       let totalAmount = 0;
       for (let i = 0; i < req.body.itemIds.length; i++) {
         const itemId = req.body.itemIds[i];
+        items.push(mongoose.Types.ObjectId(itemId));
         const item = await Item.findById(itemId);
         if (!item) return res.status(400).send("Invalid item ID");
-        items.push(item);
         totalAmount += item.cost;
       }
       const category = await Category.findByIdAndUpdate(

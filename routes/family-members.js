@@ -4,17 +4,24 @@ import { FamilyMember, validate } from "../models/family-member.js";
 import { Category } from "../models/category.js";
 import { hash, verify } from "argon2";
 import { Family } from "../models/family.js";
+import mongoose from "mongoose";
+import { addOneFamMember } from "../helper-functions.js";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   const familyMembers = await FamilyMember.find().sort("name");
+  for (let i = 0; i < familyMembers.length; i++) {
+    familyMembers[i] = await familyMembers[i].populate("categories");
+  }
   res.send(familyMembers);
 });
 
 router.get("/:id", async (req, res) => {
   try {
-    const familyMember = await FamilyMember.findById(req.params.id);
+    const familyMember = await FamilyMember.findById(req.params.id).populate(
+      "categories"
+    );
     res.send(familyMember);
   } catch (ex) {
     return res
@@ -46,10 +53,9 @@ router.post("/signin", async (req, res) => {
 
 router.post("/signup", async (req, res) => {
   console.log(req.body.family);
-  const family = Family.findOne({ _id: req.body.family });
 
   let familyMember;
-  if (family) {
+  if (req.body.family) {
     // not sure if this is right
     familyMember = new FamilyMember({
       name: req.body.name,
@@ -74,7 +80,8 @@ router.post("/signup", async (req, res) => {
 
   try {
     familyMember = await familyMember.save();
-    if (family) await addOneFamMember(familyMember._id, familyMember.familyId);
+    if (req.body.family)
+      await addOneFamMember(familyMember._id, familyMember.familyId);
   } catch (ex) {
     console.log(ex);
     for (field in ex.errors) {
@@ -86,73 +93,77 @@ router.post("/signup", async (req, res) => {
   res.send(familyMember);
 });
 
-router.post("/", async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+// router.post("/", async (req, res) => {
+//   const { error } = validate(req.body);
+//   if (error) return res.status(400).send(error.details[0].message);
 
-  if (req.body.categoryIds) {
-    let categories = [];
-    let used = 0;
+//   if (req.body.categoryIds) {
+//     let categories = [];
+//     let used = 0;
 
-    for (let i = 0; i < req.body.categoryIds.length; i++) {
-      const categoryId = req.body.categoryIds[i];
-      const category = await Category.findById(categoryId);
-      if (!category) return res.status(400).send("Invalid category ID");
-      categories.push(category);
-      used += category.totalAmount;
-    }
+//     for (let i = 0; i < req.body.categoryIds.length; i++) {
+//       const categoryId = req.body.categoryIds[i];
+//       const category = await Category.findById(categoryId);
+//       if (!category) return res.status(400).send("Invalid category ID");
+//       categories.push(category);
+//       used += category.totalAmount;
+//     }
 
-    let familyMember = new FamilyMember({
-      name: req.body.name,
-      username: req.body.username,
-      allowance: req.body.allowance,
-      categories: categories,
-      used: used,
-      familyId: req.body.familyId,
-      password: req.body.password,
-    });
+//     let familyMember = new FamilyMember({
+//       name: req.body.name,
+//       username: req.body.username,
+//       allowance: req.body.allowance,
+//       categories: categories,
+//       used: used,
+//       familyId: req.body.familyId,
+//       password: req.body.password,
+//     });
 
-    try {
-      familyMember = await familyMember.save();
-    } catch (ex) {
-      console.log(ex);
-      for (field in ex.errors) {
-        console.log(ex.errors[field].message);
-      }
-    }
-    res.send(familyMember);
-  } else {
-    let familyMember = new FamilyMember({
-      name: req.body.name,
-      username: req.body.username,
-      allowance: req.body.allowance,
-      familyId: req.body.familyId,
-      password: req.body.password,
-    });
-    try {
-      familyMember = await familyMember.save();
-    } catch (ex) {
-      for (let i = 0; i < ex.errors.length; i++) {
-        console.log(ex.errors[i].message);
-      }
-      res.status(400).send(ex);
-    }
-    res.send(familyMember);
-  }
-});
+//     try {
+//       familyMember = await familyMember.save();
+//     } catch (ex) {
+//       console.log(ex);
+//       for (field in ex.errors) {
+//         console.log(ex.errors[field].message);
+//       }
+//     }
+//     res.send(familyMember);
+//   } else {
+//     let familyMember = new FamilyMember({
+//       name: req.body.name,
+//       username: req.body.username,
+//       allowance: req.body.allowance,
+//       familyId: req.body.familyId,
+//       password: req.body.password,
+//     });
+//     try {
+//       familyMember = await familyMember.save();
+//     } catch (ex) {
+//       for (let i = 0; i < ex.errors.length; i++) {
+//         console.log(ex.errors[i].message);
+//       }
+//       res.status(400).send(ex);
+//     }
+//     res.send(familyMember);
+//   }
+// });
 
 // make it so new categories don't just replace old ones
+
 router.put("/:id", async (req, res) => {
+  console.log("herer");
   if (req.body.categoryIds) {
     try {
       let categories = [];
       let used = 0;
 
+      console.log(req.body.categoryIds);
+
       for (let i = 0; i < req.body.categoryIds.length; i++) {
         const categoryId = req.body.categoryIds[i];
         const category = await Category.findById(categoryId);
         if (!category) return res.status(400).send("Invalid category ID");
-        categories.push(category);
+        categories.push(mongoose.Types.ObjectId(categoryId));
         used += category.totalAmount;
       }
       const familyMember = await FamilyMember.findByIdAndUpdate(
@@ -209,7 +220,7 @@ router.put("/:id", async (req, res) => {
       const categoryId = req.body.categoryIds[i];
       const category = await Category.findById(categoryId);
       if (!category) return res.status(400).send("Invalid category ID");
-      categories.push(category);
+      categories.push(mongoose.Types.ObjectId(categoryId));
       used += category.totalAmount;
     }
     const familyMember = await FamilyMember.findByIdAndUpdate(
