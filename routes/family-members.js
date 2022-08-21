@@ -74,8 +74,7 @@ router.post("/signup", async (req, res) => {
 
   try {
     familyMember = await familyMember.save();
-    Family.findOneAndUpdate({ _id: req.body.family });
-    family.save();
+    if (family) await addOneFamMember(familyMember._id, familyMember.familyId);
   } catch (ex) {
     console.log(ex);
     for (field in ex.errors) {
@@ -110,6 +109,7 @@ router.post("/", async (req, res) => {
       categories: categories,
       used: used,
       familyId: req.body.familyId,
+      password: req.body.password,
     });
 
     try {
@@ -127,6 +127,7 @@ router.post("/", async (req, res) => {
       username: req.body.username,
       allowance: req.body.allowance,
       familyId: req.body.familyId,
+      password: req.body.password,
     });
     try {
       familyMember = await familyMember.save();
@@ -162,6 +163,7 @@ router.put("/:id", async (req, res) => {
           allowance: req.body.allowance,
           categories: categories,
           used: used,
+          password: req.body.password,
         },
         {
           new: true,
@@ -182,6 +184,7 @@ router.put("/:id", async (req, res) => {
           name: req.body.name,
           username: req.body.username,
           allowance: req.body.allowance,
+          password: req.body.password,
         },
         {
           new: true,

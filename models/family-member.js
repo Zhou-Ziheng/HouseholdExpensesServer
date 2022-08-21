@@ -1,37 +1,38 @@
-import mongoose from 'mongoose';
-import { categorySchema } from './category.js';
-import Joi from 'joi';
+import mongoose from "mongoose";
+import { categorySchema } from "./category.js";
+import Joi from "joi";
 
 //add password
 export const familyMemberSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    username: {
-        type: String,
-        required: true
-    },
-    allowance: Number,
-    used: Number,
-    categories: [categorySchema],
-    familyId: String
+  name: {
+    type: String,
+    required: true,
+  },
+  username: {
+    type: String,
+    required: true,
+  },
+  allowance: Number,
+  used: Number,
+  categories: [categorySchema],
+  familyId: String,
+  password: String,
 });
 
-export const FamilyMember = mongoose.model('FamilyMember', familyMemberSchema);
+export const FamilyMember = mongoose.model("FamilyMember", familyMemberSchema);
 
 function validateFamilyMemeber(familyMember) {
-    const schema = Joi.object({
-        name: Joi.string().required(),
-        username: Joi.string().required(),
-        allowance: Joi.number(),
-        familyId: Joi.number(),
-        categoryIds: Joi.array().items(Joi.string())
-    });
+  const schema = Joi.object({
+    name: Joi.string().required(),
+    username: Joi.string().required(),
+    allowance: Joi.number(),
+    familyId: Joi.number(),
+    categoryIds: Joi.array().items(Joi.string()),
+    password: Joi.string(),
+  });
 
-    const result = schema.validate(familyMember);
-    return result;
+  const result = schema.validate(familyMember);
+  return result;
 }
 
-export {validateFamilyMemeber as validate};
-
+export { validateFamilyMemeber as validate };
