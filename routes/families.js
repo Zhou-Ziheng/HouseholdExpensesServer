@@ -1,18 +1,35 @@
 import express from "express";
 import { FamilyMember } from "../models/family-member.js";
 import { Family, validate } from "../models/family.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   const families = await Family.find().sort("name");
+  for (let i = 0; i < families; i++) {
+    families[i] = await (
+      await families[i].populate("admins")
+    ).populate("familyMembers");
+  }
   res.send(families);
 });
 
 router.get("/:id", async (req, res) => {
   try {
     const family = await Family.findById(req.params.id);
-    res.send(family);
+    const populatedFam = await (
+      await family.populate("admins")
+    ).populate({
+      path: "familyMembers",
+      populate: {
+        path: "categories",
+        populate: {
+          path: "items",
+        },
+      },
+    });
+    res.send(populatedFam);
   } catch (ex) {
     return res.status(404).send("The family with the given ID was not found");
   }
@@ -21,27 +38,42 @@ router.get("/:id", async (req, res) => {
 router.post("/new", async (req, res) => {
   const user = await FamilyMember.findOne({ _id: req.cookies.userid });
 
-  let family = new Family({
-    familyName: req.body.familyName,
-    totalAllowance: 0,
-    totalUsed: 0,
-    admins: [user],
-    familyMembers: [user],
-  });
+  let family;
+
+  if (user) {
+    family = new Family({
+      familyName: req.body.familyName,
+      totalAllowance: 0,
+      totalUsed: 0,
+      admins: [mongoose.Types.ObjectId(req.cookies.userid)],
+      familyMembers: [mongoose.Types.ObjectId(req.cookies.userid)],
+    });
+  }
 
   try {
-    user.family = family._id;
-    await user.save();
-    family = await family.save();
+    family.save();
+    const updatedFam = await FamilyMember.findByIdAndUpdate(
+      req.cookies.userid,
+      {
+        name: user.name,
+        username: user.username,
+        familyId: family._id,
+      },
+      {
+        new: true,
+      }
+    );
   } catch (ex) {
     console.log(ex);
     // for (field in ex.errors) {
     //     console.log(ex.errors[field].message);
     // }
   }
+
   res.send(family);
 });
 
+// This is for when an existing user joins a family
 router.post("/", async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -54,7 +86,7 @@ router.post("/", async (req, res) => {
       const famMembId = req.body.familyMemberIds[i];
       const famMemb = await FamilyMember.findById(famMembId);
       if (!famMemb) return res.status(400).send("Invalid family member ID");
-      famMembs.push(famMemb);
+      famMembs.push(mongoose.Types.ObjectId(famMembId));
       totalUsed += famMemb.used;
       totalAllowance += famMemb.allowance;
     }
@@ -105,7 +137,7 @@ router.put("/:id", async (req, res) => {
       const famMembId = req.body.familyMemberIds[i];
       const famMemb = await FamilyMember.findById(famMembId);
       if (!famMemb) return res.status(400).send("Invalid family member ID");
-      famMembs.push(famMemb);
+      famMembs.push(mongoose.Types.ObjectId(famMembId));
       if (famMemb.used) totalUsed += famMemb.used;
       if (famMemb.allowance) totalAllowance += famMemb.allowance;
     }
@@ -122,11 +154,8 @@ router.put("/:id", async (req, res) => {
           new: true,
         }
       );
-      console.log("before send");
       res.send(family);
-      console.log("after send");
     } catch (ex) {
-      console.log(ex);
       return res.status(404).send("The family with the given ID was not found");
     }
   } else {
