@@ -6,7 +6,7 @@ import { items } from "./routes/items.js";
 import { categories } from "./routes/categories.js";
 import { families } from "./routes/families.js";
 import cookieParser from "cookie-parser";
-import { addOneFamMember } from "./helper-functions.js";
+import { addOneFamMember, addOneItem,addFamId } from "./helper-functions.js";
 
 const app = express();
 
@@ -34,3 +34,6 @@ app.listen(port, () => console.log(`listening on port ${port}`));
 app.get("/", (req, res) => {
   res.send("Househould Expenses");
 });
+
+
+// addFamId('6301484a2e02fc3afc5ff1c5', 'testId');

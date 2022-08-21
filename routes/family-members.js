@@ -178,6 +178,7 @@ router.put("/:id", async (req, res) => {
           categories: categories,
           used: used,
           password: req.body.password,
+          familyId: req.body.familyId
         },
         {
           new: true,
@@ -199,6 +200,7 @@ router.put("/:id", async (req, res) => {
           username: req.body.username,
           allowance: req.body.allowance,
           password: req.body.password,
+          familyId: req.body.familyId
         },
         {
           new: true,
@@ -214,38 +216,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
-  try {
-    let categories = [];
-    let used = 0;
-
-    for (let i = 0; i < req.body.categoryIds.length; i++) {
-      const categoryId = req.body.categoryIds[i];
-      const category = await Category.findById(categoryId);
-      if (!category) return res.status(400).send("Invalid category ID");
-      categories.push(mongoose.Types.ObjectId(categoryId));
-      used += category.totalAmount;
-    }
-    const familyMember = await FamilyMember.findByIdAndUpdate(
-      req.params.id,
-      {
-        name: req.body.name,
-        username: req.body.username,
-        allowance: req.body.allowance,
-        categories: categories,
-        used: used,
-      },
-      {
-        new: true,
-      }
-    );
-    res.send(familyMember);
-  } catch (ex) {
-    return res
-      .status(404)
-      .send("The family member with the given ID was not found");
-  }
-});
 
 router.delete("/:id", async (req, res) => {
   try {
