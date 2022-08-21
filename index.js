@@ -34,5 +34,3 @@ app.listen(port, () => console.log(`listening on port ${port}`));
 app.get("/", (req, res) => {
   res.send("Househould Expenses");
 });
-
-addOneFamMember("63011bf9021dd1cb505be20c", "6301477171ff15b5d0fbb1e0");
