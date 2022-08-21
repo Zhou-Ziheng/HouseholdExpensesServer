@@ -35,4 +35,4 @@ app.get("/", (req, res) => {
   res.send("Househould Expenses");
 });
 
-addOneFamMember('630161678affedfa55e27705','630152968062f2f1e5860094');
+addOneFamMember("63011bf9021dd1cb505be20c", "6301477171ff15b5d0fbb1e0");
