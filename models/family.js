@@ -24,6 +24,7 @@ function validateFamily(family) {
     familyName: Joi.string().required(),
     admins: Joi.array().items(Joi.string()),
     familyMemberIds: Joi.array().items(Joi.string()),
+    totalAllowance: Joi.number(),
   });
 
   const result = schema.validate(family);

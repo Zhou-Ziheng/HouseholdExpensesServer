@@ -164,6 +164,7 @@ router.put("/:id", async (req, res) => {
         req.params.id,
         {
           familyName: req.body.familyName,
+          totalAllowance: req.body.totalAllowance,
         },
         {
           new: true,
