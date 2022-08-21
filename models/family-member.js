@@ -26,7 +26,7 @@ function validateFamilyMemeber(familyMember) {
     name: Joi.string().required(),
     username: Joi.string().required(),
     allowance: Joi.number(),
-    familyId: Joi.number(),
+    familyId: Joi.string(),
     categoryIds: Joi.array().items(Joi.string()),
     password: Joi.string(),
   });
