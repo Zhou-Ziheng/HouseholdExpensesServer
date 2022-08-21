@@ -6,6 +6,7 @@ import { hash, verify } from "argon2";
 import { Family } from "../models/family.js";
 import mongoose from "mongoose";
 import { addOneFamMember } from "../helper-functions.js";
+import { Item } from "../models/item.js";
 
 const router = express.Router();
 
@@ -22,8 +23,8 @@ router.get("/:id", async (req, res) => {
     const familyMember = await FamilyMember.findById(req.params.id).populate({
       path: "categories",
       populate: {
-        path: "items"
-      }
+        path: "items",
+      },
     });
     res.send(familyMember);
   } catch (ex) {
@@ -52,6 +53,37 @@ router.post("/signin", async (req, res) => {
   }
 
   res.send({ error: "invalid password/username" });
+});
+
+router.put("/addArray/:id", async (req, res) => {
+  const familyMember = await FamilyMember.findById(req.params.id);
+
+  const itemId = req.body.itemId;
+
+  const item = await Item.findById(itemId);
+
+  let category = new Category({
+    category: req.body.category,
+    totalAmount: item.cost,
+    items: [mongoose.Types.ObjectId(itemId)],
+  });
+
+  try {
+    category = await category.save();
+
+    const oldCategories = familyMember.categories;
+    oldCategories.push(mongoose.Types.ObjectId(category._id));
+    await FamilyMember.findByIdAndUpdate(req.params.id, {
+      name: familyMember.name,
+      username: familyMember.username,
+      categories: oldCategories,
+      used: familyMember.used + item.cost,
+    });
+  } catch (ex) {
+    console.log(ex);
+  }
+
+  res.send(category);
 });
 
 router.post("/signup", async (req, res) => {
@@ -178,7 +210,7 @@ router.put("/:id", async (req, res) => {
           categories: categories,
           used: used,
           password: req.body.password,
-          familyId: req.body.familyId
+          familyId: req.body.familyId,
         },
         {
           new: true,
@@ -200,7 +232,7 @@ router.put("/:id", async (req, res) => {
           username: req.body.username,
           allowance: req.body.allowance,
           password: req.body.password,
-          familyId: req.body.familyId
+          familyId: req.body.familyId,
         },
         {
           new: true,
@@ -215,7 +247,6 @@ router.put("/:id", async (req, res) => {
     }
   }
 });
-
 
 router.delete("/:id", async (req, res) => {
   try {

@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import { addOneItem } from "../helper-functions.js";
 import { Category, validate } from "../models/category.js";
 import { Item } from "../models/item.js";
 
@@ -120,6 +121,11 @@ router.put("/:id", async (req, res) => {
         .send("The category with the given ID was not found");
     }
   }
+});
+
+router.put("/addItem/:id", async (req, res) => {
+  const response = addOneItem(req.body.itemId, req.params.id);
+  res.send(response);
 });
 
 router.delete("/:id", async (req, res) => {
