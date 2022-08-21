@@ -30,6 +30,17 @@ router.post("/new", async (req, res) => {
   });
 
   try {
+    await FamilyMember.findByIdAndUpdate(
+      req.cookies.userid,
+      {
+        name: user.name,
+        username: user.username,
+        familyId: family._id,
+      },
+      {
+        new: true,
+      }
+    );
     user.familyId = family._id;
     await user.save();
     family = await family.save();
