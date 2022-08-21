@@ -6,6 +6,7 @@ import { items } from "./routes/items.js";
 import { categories } from "./routes/categories.js";
 import { families } from "./routes/families.js";
 import cookieParser from "cookie-parser";
+import { addOneFamMember } from "./helper-functions.js";
 
 const app = express();
 
