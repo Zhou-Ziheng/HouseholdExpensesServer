@@ -248,6 +248,30 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+router.put("/updateUsed/:id", async (req, res) => {
+  let response;
+  try {
+    const familyMember = await (
+      await FamilyMember.findById(req.params.id)
+    ).populate("categories");
+
+    let total = 0;
+    const categories = familyMember.categories;
+    categories?.forEach((category) => (total += category.totalAmount));
+
+    response = await FamilyMember.findByIdAndUpdate(req.params.id, {
+      name: familyMember.name,
+      username: familyMember.username,
+      used: total,
+    });
+  } catch {
+    (e) => {
+      console.log(e);
+    };
+  }
+  res.send(response);
+});
+
 router.delete("/:id", async (req, res) => {
   try {
     const familyMember = await FamilyMember.findByIdAndRemove(req.params.id);

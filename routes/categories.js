@@ -124,7 +124,12 @@ router.put("/:id", async (req, res) => {
 });
 
 router.put("/addItem/:id", async (req, res) => {
-  const response = addOneItem(req.body.itemId, req.params.id);
+  console.log(req.cookies.userid);
+  const response = addOneItem(
+    req.body.itemId,
+    req.params.id,
+    req.cookies.userid
+  );
   res.send(response);
 });
 

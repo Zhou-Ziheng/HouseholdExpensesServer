@@ -30,7 +30,7 @@ async function addOneFamMember(memId, famId) {
   console.log(newFamily);
 }
 
-async function addOneItem(itemId, categoryId) {
+async function addOneItem(itemId, categoryId, userId) {
   let allItemIds = [itemId];
   const response = await fetch(
     "http://localhost:3000/api/categories/" + categoryId
@@ -54,6 +54,21 @@ async function addOneItem(itemId, categoryId) {
       },
     }
   );
+
+  console.log("ayo", userId);
+  if (userId) {
+    await fetch(
+      "http://localhost:3000/api/family-members/updateUsed/" + userId,
+      {
+        method: "PUT",
+        body: JSON.stringify({}), // string or object
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+
   const updatedCategory = await putResponse.json();
   return updatedCategory;
 }
