@@ -19,9 +19,12 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const familyMember = await FamilyMember.findById(req.params.id).populate(
-      "categories"
-    );
+    const familyMember = await FamilyMember.findById(req.params.id).populate({
+      path: "categories",
+      populate: {
+        path: "items"
+      }
+    });
     res.send(familyMember);
   } catch (ex) {
     return res
